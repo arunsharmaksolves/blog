@@ -1,11 +1,11 @@
 import { useNavigate, useParams } from "react-router-dom"
 import Comment from "../components/Comments"
+import Likes from "../components/Likes"
 import Footer from "../components/Footer"
 import Navbar from "../components/Navbar"
 import {BiEdit} from 'react-icons/bi'
 import {MdDelete} from 'react-icons/md'
-import { CiHeart } from "react-icons/ci";
-import { FaHeart } from "react-icons/fa";
+
 import axios from "axios"
 import { URL,IF } from "../url"
 import { useContext, useEffect, useState } from "react"
@@ -23,6 +23,8 @@ const PostDetails = () => {
   const [like,setLike] = useState(false)
   const [loader,setLoader]=useState(false)
   const navigate=useNavigate()
+
+
   
 
   const fetchPost=async()=>{
@@ -100,10 +102,19 @@ const PostDetails = () => {
     }
   };
 
-  const handleLike=()=>{
-    setLike(!like);
-    console.log(like);
-  }
+  const handleClick = async () => {
+    try {
+      const response = await axios.put(URL + "/api/posts/like/" + postId);
+      // You may need to update the URL based on your server implementation
+      const { likeCount } = response.data;
+      setLike(!like);
+      setLikeCount(likeCount);
+      console.log(`Post liked successfully. Like count: ${likeCount}`);
+    } catch (error) {
+      console.error("Error liking post:", error.response?.data?.message || error.message);
+    }
+  };
+
   
 
 
@@ -126,7 +137,7 @@ const PostDetails = () => {
        <p>{new Date(post.updatedAt).toString().slice(16,24)}</p>
        </div>
         </div>
-        <button style={{display:"ruby", fontSize:"xx-large", marginTop:"1rem"}} onClick={handleLike}>{like ? <FaHeart /> : <CiHeart />}Like</button>
+        <Likes onClick={handleClick} setLike={setLike} like={like} postId={postId}/>
         <img src={IF+post.photo} className="w-full  mx-auto mt-8" alt=""/>
          <p className="mx-auto mt-8">{post.desc}</p>
          <div className="flex items-center mt-8 space-x-4 font-semibold">

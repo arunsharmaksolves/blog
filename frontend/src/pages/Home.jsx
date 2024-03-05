@@ -7,64 +7,85 @@ import { useContext, useEffect, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import Loader from '../components/Loader'
 import { UserContext } from "../context/UserContext"
- 
+import {paginate} from "../components/Paginate"
+import Pagination from "../components/Pagination"
+
 
 const Home = () => {
+
   
-  const {search}=useLocation()
+
+  const { search } = useLocation()
   // console.log(search)
-  const [posts,setPosts]=useState([])
-  const [noResults,setNoResults]=useState(false)
-  const [loader,setLoader]=useState(false)
-  const {user}=useContext(UserContext)
+  const [posts, setPosts] = useState([])
+  const [noResults, setNoResults] = useState(false)
+  const [loader, setLoader] = useState(false)
+  const { user } = useContext(UserContext)
   // console.log(user)
 
-  const fetchPosts=async()=>{
+  const fetchPosts = async () => {
     setLoader(true)
-    try{
-      const res=await axios.get(URL+"/api/posts/"+search)
+    try {
+      const res = await axios.get(URL + "/api/posts/" + search)
       // console.log(res.data)
       setPosts(res.data)
-      if(res.data.length===0){
+      if (res.data.length === 0) {
         setNoResults(true)
       }
-      else{
+      else {
         setNoResults(false)
       }
       setLoader(false)
-      
+
     }
-    catch(err){
+    catch (err) {
       console.log(err)
       setLoader(true)
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchPosts()
 
-  },[search])
+  }, [search])
+
+  // console.log(posts);
+
+  const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
+   
+    const onPageChange = (page) => {
+      setCurrentPage(page);
+      window.scrollTo(0,0);
+    };
+    const paginatedPosts = paginate(posts, currentPage, pageSize);
 
 
 
   return (
-    
+
     <>
-    <Navbar/>
-<div className="px-8 md:px-[200px] min-h-[80vh]">
-        {loader?<div className="h-[40vh] flex justify-center items-center"><Loader/></div>:!noResults?
-        posts.map((post)=>(
-          <>
-          <Link to={user?`/posts/post/${post._id}`:"/login"}>
-          <HomePosts key={post._id} post={post}/>
-          </Link>
-          </>
-          
-        )):<h3 className="text-center font-bold mt-16">No posts available</h3>}
-    </div>
-    <Footer/>
+      <Navbar />
+      <div className="px-8 md:px-[200px] min-h-[80vh]">
+        {loader ? <div className="h-[40vh] flex justify-center items-center"><Loader /></div> : !noResults ?
+          paginatedPosts.map((post) => (
+            <>
+              <Link to={user ? `/posts/post/${post._id}` : "/login"}>
+                <HomePosts key={post._id} post={post} />
+              </Link>
+            </>
+
+          )) : <h3 className="text-center font-bold mt-16">No posts available</h3>}
+      </div>
+      <Pagination
+         items={posts.length} 
+         currentPage={currentPage} 
+         pageSize={pageSize} 
+         onPageChange={onPageChange}
+          />
+      <Footer />
     </>
-    
+
   )
 }
 

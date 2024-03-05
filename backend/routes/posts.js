@@ -22,10 +22,28 @@ router.post("/create",verifyToken,async (req,res)=>{
      
 })
 
+router.put('/like/:id', async (req, res) => {
+    try {
+      const postId = req.params.id;
+      const { userId } = req.body;
+      const post = await Post.findById(postId);
+      let updatedLikes;
+      if (post.likes.includes(userId)) {
+        updatedLikes = await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true });
+      } else {
+        updatedLikes = await Post.findByIdAndUpdate(postId, { $addToSet: { likes: userId } }, { new: true });
+      }
+      res.status(200).json(updatedLikes);
+    } catch (error) {
+      console.error("Error updating likes:", error);
+      res.status(500).json({ error: "Failed to update likes" });
+    }
+  });
+
 //UPDATE
 router.put("/:id",verifyToken,async (req,res)=>{
     try{
-       
+       console.log(req);
         const updatedPost=await Post.findByIdAndUpdate(req.params.id,{$set:req.body},{new:true})
         res.status(200).json(updatedPost)
 

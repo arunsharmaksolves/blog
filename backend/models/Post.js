@@ -28,6 +28,7 @@ const PostSchema=new mongoose.Schema({
         type:Array,
         
     },
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 },{timestamps:true})
 
 module.exports=mongoose.model("Post",PostSchema)
