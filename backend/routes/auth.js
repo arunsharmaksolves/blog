@@ -66,8 +66,11 @@ router.get("/refetch", (req,res)=>{
     jwt.verify(token,process.env.SECRET,{},async (err,data)=>{
         if(err){
             return res.status(404).json(err)
+        }else{
+            console.log(data)
+            res.status(200).json(data)
         }
-        res.status(200).json(data)
+        
     })
 })
 

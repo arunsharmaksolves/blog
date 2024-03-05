@@ -28,7 +28,7 @@ const App = () => {
       <Route exact path="/edit/:id" element={<EditPost/>}/>
       <Route exact path="/myblogs/:id" element={<MyBlogs/>}/>
       <Route exact path="/profile/:id" element={<Profile/>}/>
-      <Route exact path="/super/:id" element={<SuperAdmin />} />
+      <Route exact path="/api/super/allUser" element={<SuperAdmin />} />
       </Routes>
     
       </UserContextProvider>
