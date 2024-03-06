@@ -62,7 +62,7 @@ const Navbar = () => {
 
 
   return (
-    <div className="flex items-center justify-between px-6 md:px-[200px] py-4">
+    <div className="sticky top-0 bg-white  z-50 flex items-center justify-between px-6 md:px-[200px] py-4">
       <h1 className="text-lg md:text-xl font-extrabold"><Link to="/">Blog4U</Link></h1>
       {path === "/" && <div className="flex justify-center items-center space-x-0">
         <p onClick={() => navigate(prompt ? "?search=" + prompt : navigate("/"))} className="cursor-pointer"><BsSearch /></p>

@@ -80,20 +80,36 @@ router.get("/:id",async (req,res)=>{
 })
 
 //GET POSTS
-router.get("/",async (req,res)=>{
-    const query=req.query
-    
-    try{
-        const searchFilter={
-            title:{$regex:query.search, $options:"i"}
-        }
-        const posts=await Post.find(query.search?searchFilter:null)
-        res.status(200).json(posts)
+router.get("/", async (req, res) => {
+    const { search } = req.query;
+  
+    try {
+      const searchFilter = search
+        ? { title: { $regex: search, $options: "i" } }
+        : {};
+  
+      const posts = await Post.find(searchFilter);
+        console.log(posts)
+      res.status(200).json(posts);
+    } catch (err) {
+      res.status(500).json(err);
     }
-    catch(err){
-        res.status(500).json(err)
+  });
+
+router.get('/filter', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit) || 5; // Default limit is 10 if not specified
+      const startIndex = parseInt(req.query.startIndex) || 0; // Default startIndex is 0 if not specified
+  
+      const data = await Post.find().skip(startIndex).limit(limit).toArray();
+  
+      res.json(data);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-})
+  });
+  
 
 //GET USER POSTS
 router.get("/user/:userId",async (req,res)=>{
