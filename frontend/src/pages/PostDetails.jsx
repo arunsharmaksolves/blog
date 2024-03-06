@@ -11,6 +11,8 @@ import { URL,IF } from "../url"
 import { useContext, useEffect, useState } from "react"
 import { UserContext } from "../context/UserContext"
 import Loader from "../components/Loader"
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const PostDetails = () => {
@@ -57,7 +59,6 @@ const PostDetails = () => {
 
   useEffect(()=>{
     fetchPost()
-
   },[postId])
 
   const fetchPostComments=async()=>{
@@ -105,11 +106,20 @@ const PostDetails = () => {
   const handleClick = async () => {
     try {
       const response = await axios.put(URL + "/api/posts/like/" + postId);
-      // You may need to update the URL based on your server implementation
       const { likeCount } = response.data;
       setLike(!like);
       setLikeCount(likeCount);
-      console.log(`Post liked successfully. Like count: ${likeCount}`);
+      toast.success('Post Liked Successfully', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
+      // console.log(`Post liked successfully. Like count: ${likeCount}`);
     } catch (error) {
       console.error("Error liking post:", error.response?.data?.message || error.message);
     }
@@ -166,6 +176,18 @@ const PostDetails = () => {
          </div>
         </div>}
         <Footer/>
+        <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   )
 }

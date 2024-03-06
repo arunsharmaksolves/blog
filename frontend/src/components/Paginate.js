@@ -1,5 +1,4 @@
 export const paginate = (items, pageNumber, pageSize) => {
     const startIndex = (pageNumber - 1) * pageSize;
-    // console.log(typeof(items));
-    return items.slice(startIndex, startIndex + pageSize); // 0, 9
+    return items.slice(startIndex, startIndex + 2); // 0, 9
   };

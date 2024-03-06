@@ -52,7 +52,7 @@ const Home = () => {
   // console.log(posts);
 
   const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 10;
+    const pageSize = 2;
    
     const onPageChange = (page) => {
       setCurrentPage(page);
@@ -82,7 +82,7 @@ const Home = () => {
          currentPage={currentPage} 
          pageSize={pageSize} 
          onPageChange={onPageChange}
-          />
+        />
       <Footer />
     </>
 
