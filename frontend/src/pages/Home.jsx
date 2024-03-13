@@ -22,7 +22,7 @@ const Home = () => {
     setLoader(true);
     try {
       const res = await axios.get(URL + "/api/posts/" + search)
-      console.log(res.data)
+      // console.log(res.data)
       setPosts(res.data);
       if (res.data.length === 0 || res.data.length < visiblePosts) {
         setHasMorePosts(false);
@@ -35,6 +35,7 @@ const Home = () => {
       setLoader(false);
     }
   };
+  console.log(posts)
 
   const handleScroll = () => {
     if (
@@ -66,7 +67,7 @@ const Home = () => {
         ) : !noResults ? (
           <>
             {posts.slice(0, visiblePosts).map((post) => (
-              <Link key={post._id} to={user ? `/posts/post/${post._id}` : "/login"}>
+              <Link key={post.id} to={user ? `/posts/post/${post.id}` : "/login"}>
                 <HomePosts post={post} />
               </Link>
             ))}

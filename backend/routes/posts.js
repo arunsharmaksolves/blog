@@ -1,127 +1,97 @@
-const express=require('express')
-const router=express.Router()
-const User=require('../models/User')
-const bcrypt=require('bcrypt')
-const Post=require('../models/Post')
-const Comment=require('../models/Comment')
-const verifyToken = require('../verifyToken')
+const express = require('express');
+const router = express.Router();
+const pool = require('../database/db'); // Import your PostgreSQL connection pool
+const verifyToken = require('../verifyToken');
 
-//CREATE
-router.post("/create",verifyToken,async (req,res)=>{
-    try{
-        const newPost=new Post(req.body)
-        // console.log(req.body)
-        const savedPost=await newPost.save()
-        
-        res.status(200).json(savedPost)
-    }
-    catch(err){
-        
-        res.status(500).json(err)
-    }
-     
-})
+// CREATE
+router.post('/create', verifyToken, async (req, res) => {
+  try {
+    const { title, desc, photo, username, userId, categories } = req.body;
 
-router.put('/like/:id', async (req, res) => {
-    try {
-      const postId = req.params.id;
-      const { userId } = req.body;
-      const post = await Post.findById(postId);
-      let updatedLikes;
-      if (post.likes.includes(userId)) {
-        updatedLikes = await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true });
-      } else {
-        updatedLikes = await Post.findByIdAndUpdate(postId, { $addToSet: { likes: userId } }, { new: true });
-      }
-      res.status(200).json(updatedLikes);
-    } catch (error) {
-      console.error("Error updating likes:", error);
-      res.status(500).json({ error: "Failed to update likes" });
-    }
-  });
+    const newPost = await pool.query(
+      'INSERT INTO posts (title, desc, photo, username, userId, categories) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [title, desc, photo, username, userId, categories]
+    );
 
-//UPDATE
-router.put("/:id",verifyToken,async (req,res)=>{
-    try{
-       console.log(req);
-        const updatedPost=await Post.findByIdAndUpdate(req.params.id,{$set:req.body},{new:true})
-        res.status(200).json(updatedPost)
+    res.status(200).json(newPost.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
 
-    }
-    catch(err){
-        res.status(500).json(err)
-    }
-})
+// UPDATE
+router.put('/:id', verifyToken, async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const { title, desc, photo, username, userId, categories } = req.body;
 
+    const updatedPost = await pool.query(
+      'UPDATE posts SET title = $1, desc = $2, photo = $3, username = $4, userId = $5, categories = $6 WHERE id = $7 RETURNING *',
+      [title, desc, photo, username, userId, categories, postId]
+    );
 
-//DELETE
-router.delete("/:id",verifyToken,async (req,res)=>{
-    try{
-        await Post.findByIdAndDelete(req.params.id)
-        await Comment.deleteMany({postId:req.params.id})
-        res.status(200).json("Post has been deleted!")
+    res.status(200).json(updatedPost.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
 
-    }
-    catch(err){
-        res.status(500).json(err)
-    }
-})
+// DELETE
+router.delete('/:id', verifyToken, async (req, res) => {
+  try {
+    const postId = req.params.id;
 
+    await pool.query('DELETE FROM posts WHERE id = $1', [postId]);
+    await pool.query('DELETE FROM comments WHERE postId = $1', [postId]);
 
-//GET POST DETAILS
-router.get("/:id",async (req,res)=>{
-    try{
-        const post=await Post.findById(req.params.id)
-        res.status(200).json(post)
-    }
-    catch(err){
-        res.status(500).json(err)
-    }
-})
+    res.status(200).json('Post has been deleted!');
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
 
-//GET POSTS
-router.get("/", async (req, res) => {
-    const { search } = req.query;
-  
-    try {
-      const searchFilter = search
-        ? { title: { $regex: search, $options: "i" } }
-        : {};
-  
-      const posts = await Post.find(searchFilter);
-        console.log(posts)
-      res.status(200).json(posts);
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  });
+// GET POST DETAILS
+router.get('/:id', async (req, res) => {
+  try {
+    const postId = req.params.id;
 
-router.get('/filter', async (req, res) => {
-    try {
-      const limit = parseInt(req.query.limit) || 5; // Default limit is 10 if not specified
-      const startIndex = parseInt(req.query.startIndex) || 0; // Default startIndex is 0 if not specified
-  
-      const data = await Post.find().skip(startIndex).limit(limit).toArray();
-  
-      res.json(data);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
-  
+    const post = await pool.query('SELECT * FROM posts WHERE id = $1', [postId]);
 
-//GET USER POSTS
-router.get("/user/:userId",async (req,res)=>{
-    try{
-        const posts=await Post.find({userId:req.params.userId})
-        res.status(200).json(posts)
-    }
-    catch(err){
-        res.status(500).json(err)
-    }
-})
+    res.status(200).json(post.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
 
+// GET POSTS
+router.get('/', async (req, res) => {
+  const { search } = req.query;
 
+  try {
+    const searchFilter = search ? `WHERE title ILIKE '%${search}%'` : '';
+    const posts = await pool.query(`SELECT * FROM posts ${searchFilter}`);
 
-module.exports=router
+    res.status(200).json(posts.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
+
+// GET USER POSTS
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const userPosts = await pool.query('SELECT * FROM posts WHERE userId = $1', [req.params.userId]);
+
+    res.status(200).json(userPosts.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
+
+module.exports = router;

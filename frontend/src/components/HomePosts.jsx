@@ -3,6 +3,7 @@ import { IF } from '../url'
 
 
 const HomePosts = ({ post }) => {
+  // console.log(post);
   return (
     <div className="w-full flex mt-8 space-x-4">
       {/* left */}
@@ -22,13 +23,13 @@ const HomePosts = ({ post }) => {
           </div>
         </div>
         <p className="text-sm md:text-lg">
-          {post.desc.length > 200 ? (
+          {post.description.length > 200 ? (
             <>
-              {post.desc.slice(0, 200)}
+              {post.description.slice(0, 200)}
               <span className="text-sm md:text-lg text-blue-700"> ...Read More</span>
             </>
           ) : (
-            post.desc
+            post.description
           )}
         </p>
 

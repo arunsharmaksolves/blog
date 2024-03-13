@@ -1,34 +1,33 @@
-const mongoose=require('mongoose')
+const pool = require('../index.js');
 
-const PostSchema=new mongoose.Schema({
-    title:{
-        type:String,
-        required:true,
-        unique:true
-    },
-    desc:{
-        type:String,
-        required:true,
-        unique:true
-    },
-    photo:{
-        type:String,
-        required:false,
-        
-    },
-    username:{
-        type:String,
-        required:true,  
-    },
-    userId:{
-        type:String,
-        required:true,  
-    },
-    categories:{
-        type:Array,
-        
-    },
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-},{timestamps:true})
+const PostSchema = {
+  title: {
+    type: 'VARCHAR(255)',
+    notNull: true,
+    unique: true,
+  },
+  description: {
+    type: 'TEXT',
+    notNull: true,
+    unique: true,
+  },
+  photo: 'VARCHAR(255)',
+  username: {
+    type: 'VARCHAR(255)',
+    notNull: true,
+  },
+  userId: {
+    type: 'VARCHAR(255)',
+    notNull: true,
+  },
+  categories: {
+    type: 'TEXT[]',
+  },
+  likes: {
+    type: 'VARCHAR(255)[]',
+    references: 'User(id)',
+  },
+  createdAt: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+};
 
-module.exports=mongoose.model("Post",PostSchema)
+module.exports = PostSchema;
